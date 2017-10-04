@@ -1,13 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Switchedxml
 {
     public static class TCUtility
     {
+        const int POS_HOUR = 0;
+        const int POS_MIN = 1;
+        const int POS_SEC = 2;
+        const int POS_FRAME = 3;
+
+        public static void ltc_frame_increment(int[] frame)
+        {
+            frame[POS_FRAME]++;
+            if (frame[POS_FRAME] == 30)
+            {
+                frame[POS_FRAME] = 0;
+                frame[POS_SEC]++;
+                if (frame[POS_SEC] == 60)
+                {
+                    frame[POS_SEC] = 0;
+                    frame[POS_MIN]++;
+                    if (frame[POS_MIN] == 60)
+                    {
+                        frame[POS_MIN] = 0;
+                        frame[POS_HOUR]++;
+                    }
+                }
+            }
+            if ((frame[POS_MIN] % 10) != 0 &&
+                frame[POS_SEC] == 0 &&
+                frame[POS_FRAME] == 0)
+            {
+                frame[POS_FRAME] += 2;
+            }
+        }
         /// <summary>
         ///
         /// </summary>
@@ -20,12 +46,12 @@ namespace Switchedxml
             {
                 int[] hhmmssff = Array.ConvertAll(s, int.Parse);
                 int f = 0;
-                f += hhmmssff[0] * 107892;
-                f += hhmmssff[1] * 60 * 30;
-                f -= 2 * (hhmmssff[1] - hhmmssff[1] / 10); ; //drop effect. maybe.
+                f += hhmmssff[POS_HOUR] * 107892;
+                f += hhmmssff[POS_MIN] * 60 * 30;
+                f -= 2 * (hhmmssff[POS_MIN] - hhmmssff[POS_MIN] / 10); ; //drop effect. maybe.
 
-                f += hhmmssff[2] * 30;
-                f += hhmmssff[3];
+                f += hhmmssff[POS_SEC] * 30;
+                f += hhmmssff[POS_FRAME];
                 return f;
             }
             return 0;
@@ -40,7 +66,7 @@ namespace Switchedxml
         public static string DfFrameToDate(int f)
         {
             int nmin10 = f / dfmin10;
-            int rem10 = (f % dfmin10 - 2) / nmin10;
+            int rem10 = (f % dfmin10 - 2) / dfmin1;
 
             int df = f + 2 * (9 * nmin10 + rem10);
 
@@ -49,6 +75,28 @@ namespace Switchedxml
             int ss = df / secf; df %= secf;
             return string.Format("{0:d2}:{1:d2}:{2:d2}:{3:d2}", hh, mm, ss, df);
 
+        }
+
+        public static bool Test()
+        {
+            int[] ltc = new int[4];
+            int nframe = 0;
+            while (nframe < 86400*30)
+            {
+                nframe++;
+                ltc_frame_increment(ltc);
+
+                string df = string.Format("{0:d2}:{1:d2}:{2:d2}:{3:d2}", ltc[0], ltc[1], ltc[2], ltc[3]);
+                int f = dateDfToFrame(df);
+                string df2 = DfFrameToDate(nframe);
+
+                if (f != nframe || df2 != df)
+                {
+                    Console.WriteLine("{0}", df);
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
