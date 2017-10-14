@@ -41,7 +41,7 @@ namespace Switchedxml
         /// <returns></returns>
         public static int dateDfToFrame(string dat)
         {
-            string[] s = dat.Split(';', ':');
+            string[] s = dat.Split(';', ':', '.');
             if (s.Length == 4)
             {
                 int[] hhmmssff = Array.ConvertAll(s, int.Parse);

@@ -8,6 +8,38 @@ using System.Xml.XPath;
 
 namespace Switchedxml
 {
+    public class TimeCode
+    {
+        string tcstr;
+        int tcframe;
+        public override string ToString()
+        {
+            return TCUtility.DfFrameToDate(tcframe);
+        }
+        public int Frame {  get { return tcframe; } }
+        public TimeCode(XElement xe)
+        {
+            tcstr = xe.Element("string").Value.ToString();
+
+            XElement xeframe = xe.Element("frame");
+            if (xeframe != null)
+            {
+                int.TryParse(xeframe.Value.ToString(), out tcframe);
+
+                int timebase = 30;
+                int.TryParse(xe.XPathSelectElement("rate/timebase").Value.ToString(), out timebase);
+                if (timebase != 0)
+                {
+                    tcframe = tcframe * 30 / timebase;
+                }
+            }
+            else
+            {
+                tcframe = TCUtility.dateDfToFrame(tcstr);
+            }
+        }
+    }
+
     public class FileElement
     {
 
@@ -19,6 +51,10 @@ namespace Switchedxml
         public int duration { get; set; }
 
         public string timecode { get; set; }
+
+        TimeCode filetc;
+
+        public int tc {  get { return TCUtility.dateDfToFrame(timecode); } }
         public FileElement(XElement elem)
         {
             id = elem.Attribute("id").Value;
@@ -26,6 +62,7 @@ namespace Switchedxml
             name = elem.Element("name").Value;
             duration = int.Parse(elem.Element("duration").Value);
             timecode = elem.XPathSelectElement("timecode/string").Value;
+            filetc = new TimeCode(elem.XPathSelectElement("timecode"));
         }
 
         public string RealPath()
@@ -126,5 +163,14 @@ namespace Switchedxml
                 new XElement("ntsc", "true")
             );
         }
+    }
+
+    public class FileElements : List<FileElement>
+    {
+        public FileElement FindById(string fileref)
+        {
+            return this.Find(f => f.id == fileref);
+        }
+
     }
 }

@@ -55,6 +55,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="tclog1.cs" />
     <Compile Include="TCUtility.cs" />
     <Compile Include="XmlProject.cs" />
     <EmbeddedResource Include="Form1.resx">

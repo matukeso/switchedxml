@@ -19,16 +19,19 @@ namespace Switchedxml
 
         private void button1_Click(object sender, EventArgs e)
         {
-            XmlProject xp = new XmlProject();
+            TCLog1 log = new TCLog1();
+            log.Read(@"C:\Users\matuken\Documents\recved\広島フラ1日目.txt");
 
-            int i = 0;
-            foreach ( var f in xp.files )
+            XmlProject xp = new XmlProject();
+            xp.Read(@"C:\Users\matuken\Documents\recved\4GB分割(Resolve).xml");
+
+
+            foreach( Track t in xp.tracks)
             {
-                listBox1.Items.Add( string.Format("Tr{0}={1}\t{2}", ++i, f.duration, f.RealPath()));
+//                t.files
             }
 
-            xp.lengths.Add( new  KeyValuePair<FileElement, int>( xp.lengths[0].Key, 100));
-            xp.RebuildByLength();   
+            xp.RebuildByLength(log);   
         }
 
         private void Form1_Load(object sender, EventArgs e)
