@@ -12,6 +12,10 @@ namespace Switchedxml
     {
         string tcstr;
         int tcframe;
+
+        int original_rate;
+
+        public int OriginalRate {  get { return original_rate; } }
         public override string ToString()
         {
             return TCUtility.DfFrameToDate(tcframe);
@@ -21,21 +25,29 @@ namespace Switchedxml
         {
             tcstr = xe.Element("string").Value.ToString();
 
+            int timebase = 30;
+            int.TryParse(xe.XPathSelectElement("rate/timebase").Value.ToString(), out timebase);
+            original_rate = timebase;
             XElement xeframe = xe.Element("frame");
             if (xeframe != null)
             {
                 int.TryParse(xeframe.Value.ToString(), out tcframe);
 
-                int timebase = 30;
-                int.TryParse(xe.XPathSelectElement("rate/timebase").Value.ToString(), out timebase);
                 if (timebase != 0)
                 {
-                    tcframe = tcframe * 30 / timebase;
+                    tcframe = tcframe * 60 / timebase;
+                    tcstr = TCUtility.DfFrameToDate(tcframe);
                 }
             }
             else
             {
-                tcframe = TCUtility.dateDfToFrame(tcstr);
+                if (timebase != 60)
+                {
+                    tcframe = TCUtility.dateDfToFrame30(tcstr);
+                }
+                else { 
+                    tcframe = TCUtility.dateDfToFrame60(tcstr);
+                }
             }
         }
     }
@@ -54,15 +66,16 @@ namespace Switchedxml
 
         TimeCode filetc;
 
-        public int tc {  get { return TCUtility.dateDfToFrame(timecode); } }
+        public int tc {  get { return TCUtility.dateDfToFrame60(timecode); } }
         public FileElement(XElement elem)
         {
             id = elem.Attribute("id").Value;
             pathurl = elem.Element("pathurl").Value;
             name = elem.Element("name").Value;
-            duration = int.Parse(elem.Element("duration").Value);
-            timecode = elem.XPathSelectElement("timecode/string").Value;
-            filetc = new TimeCode(elem.XPathSelectElement("timecode"));
+            TimeCode tc = new TimeCode(elem.XPathSelectElement("timecode"));
+            timecode = tc.ToString();
+            filetc = tc;
+            duration = int.Parse(elem.Element("duration").Value) * 60 / tc.OriginalRate;
         }
 
         public string RealPath()
@@ -133,13 +146,13 @@ namespace Switchedxml
             {
                 xe.Add(
                     new XElement("duration", duration),
-                        GenRate30ntsc(),
+                        GenRate60ntsc(),
                         new XElement("name", name),
                         new XElement("pathurl", pathurl),
                         new XElement("timecode",
                             new XElement("string", timecode),
                             new XElement("displayformat", "DF"),
-                            GenRate30ntsc()
+                            GenRate60ntsc()
                             ),
                         new XElement("media",
                             new XElement("video",
@@ -156,10 +169,10 @@ namespace Switchedxml
             clip.Add(xe);
         }
 
-        public static XElement GenRate30ntsc()
+        public static XElement GenRate60ntsc()
         {
             return new XElement("rate", 
-                new XElement("timebase", 30),
+                new XElement("timebase", 60),
                 new XElement("ntsc", "true")
             );
         }
