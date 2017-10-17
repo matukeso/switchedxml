@@ -48,7 +48,7 @@ namespace Switchedxml
                     int.TryParse(svtext, out pgm);
                     if( pgm >= 0 && pgm != last_switch)
                     {
-                        int frame = TCUtility.dateDfToFrame(sv[0]);
+                        int frame = TCUtility.dateDfToFrame30(sv[0]);
                         if (prev_f != -1)
                         {
                             this.Add(new TCLogElement(prev_f, frame - prev_f, last_switch));

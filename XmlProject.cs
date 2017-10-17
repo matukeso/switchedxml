@@ -32,13 +32,15 @@ namespace Switchedxml
         }
         public ClipItem(XElement xe)
         {
+            int rate = int.Parse(xe.XPathSelectElement("rate/timebase").Value);
+
             id = xe.Attribute("id").Value;
-            duration = int.Parse(xe.Element("duration").Value);
-            start = int.Parse(xe.Element("start").Value);
-            end = int.Parse(xe.Element("end").Value);
+            duration = int.Parse(xe.Element("duration").Value) * 60 /rate; 
+            start = int.Parse(xe.Element("start").Value) * 60 / rate;
+            end = int.Parse(xe.Element("end").Value) * 60 / rate;
             enabled = xe.Element("enabled").Value == "true";
-            inf = int.Parse(xe.Element("in").Value);
-            outf = int.Parse(xe.Element("in").Value);
+            inf = int.Parse(xe.Element("in").Value) * 60 / rate;
+            outf = int.Parse(xe.Element("out").Value) * 60 / rate;
             fileref = xe.Element("file").Attribute("id").Value;
 
         }
@@ -69,7 +71,7 @@ namespace Switchedxml
             clip.Add(
                  new XElement("name", name)
                 ,new XElement("duration", duration)
-                ,FileElement.GenRate30ntsc()
+                ,FileElement.GenRate60ntsc()
                 ,new XElement("start", start)
                 ,new XElement("end", end)
                 ,new XElement("enabled", enabled ? "true" : "false")
@@ -108,12 +110,44 @@ namespace Switchedxml
             }
         }
 
-        public XElement CreateTrackNode( TCLog1 log, int mytrackno)
+        public XElement CreateTrackNode( int projecttc, TCLog1 log, int mytrackno)
         {
             XElement track = new XElement("track");
+
+            int log_first_tc = log[0].start_tc;
+
+            for (int ii = 0; ii < Count; ii++)
+            {
+                TrackFile ciref = files[ii];
+                if(ciref.f_start_tc  < log_first_tc)
+                {
+                    int start = ciref.f_start_tc;
+                    int len = Math.Min(ciref.f_length, log_first_tc - start);
+                    if (start < projecttc)
+                    {
+                        files[0].inOffset = 0;
+                        len -= (projecttc- ciref.f_start_tc );
+                        start = projecttc;
+                    }
+
+                    if (len < 0)
+                        continue;
+                    List<ClipItem> clips = GonvertTcToClips(projecttc, start, len, false);
+
+                    foreach (ClipItem ci in clips)
+                    {
+                        ci.AppendNode(track);
+                    }
+
+                }
+                else
+                    break;
+
+            }
+
             foreach (TCLogElement le in log)
             {
-                List<ClipItem> clips = GonvertTcToClips(le.start_tc, le.length, mytrackno == le.ch);
+                List<ClipItem> clips = GonvertTcToClips(projecttc,le.start_tc, le.length, mytrackno == le.ch);
                 foreach( ClipItem ci in clips)
                 {
                     ci.AppendNode(track);
@@ -123,15 +157,18 @@ namespace Switchedxml
             track.Add(new XElement("locked", "false"));
             return track;
         }
-        public static XElement CreateVirtualTrackNode( TCLog1 log, List<Track> tracks)
+        public static XElement CreateVirtualTrackNode( int project_tc, TCLog1 log, List<Track> tracks)
         {
             XElement track = new XElement("track");
             foreach (TCLogElement le in log)
             {
-                List<ClipItem> clips = tracks[le.ch].GonvertTcToClips(le.start_tc, le.length,true);
-                foreach (ClipItem ci in clips)
+                if (le.ch < tracks.Count)
                 {
-                    ci.AppendNode(track);
+                    List<ClipItem> clips = tracks[le.ch].GonvertTcToClips(project_tc, le.start_tc, le.length, true);
+                    foreach (ClipItem ci in clips)
+                    {
+                        ci.AppendNode(track);
+                    }
                 }
             }
             track.Add(new XElement("enabled", "true"));
@@ -139,13 +176,13 @@ namespace Switchedxml
             return track;
 
         }
+        public static int uniqueid = 0;
 
-        private List<ClipItem> GonvertTcToClips(int start_tc,  int frame_len, bool bActiveCh)
+        private List<ClipItem> GonvertTcToClips(int project_tc, int start_tc,  int frame_len, bool bActiveCh)
         {
             List<ClipItem> clips = new List<ClipItem>();
             int nFileIndex = 0;
             TrackFile fe = files[nFileIndex];
-            int uniqueid = 0;
             do
             {
                 //tclog << project_start. skip.
@@ -155,7 +192,7 @@ namespace Switchedxml
                 }
 
                 int inf = start_tc - fe.f_start_tc;
-                int cliplen = Math.Min(fe.f_length - inf, frame_len);
+                int cliplen = Math.Min(fe.f_length - inf , frame_len);
 
                 // log start tc < splitted file . so move next file.
                 if (cliplen <= 0)
@@ -171,14 +208,16 @@ namespace Switchedxml
                     break;
                 }
 
+
+
                 ClipItem v = new ClipItem(fe.fe);
                 v.id = fe.fe.name + "_" + (uniqueid++).ToString();
 
                 v.duration = cliplen;
-                v.inf = inf;
-                v.outf = inf + cliplen;
-                v.start = start_tc;
-                v.end = start_tc + cliplen;
+                v.inf = inf + fe.inOffset ;
+                v.outf = inf + cliplen + fe.inOffset ;
+                v.start = start_tc  - project_tc + fe.inOffset;
+                v.end = start_tc + cliplen - project_tc + fe.inOffset;
                 v.enabled = bActiveCh;
 
                 clips.Add(v);
@@ -194,12 +233,14 @@ namespace Switchedxml
         {
             public int f_start_tc;
             public int f_length;
+            public int inOffset;
             public FileElement fe;
 
-            public TrackFile( int st, int len, FileElement fe)
+            public TrackFile( int st, int len, int inp, FileElement fe)
             {
                 this.f_start_tc = st;
                 this.f_length = len;
+                this.inOffset = inp;
                 this.fe = fe;
             }
             public override string ToString()
@@ -222,7 +263,7 @@ namespace Switchedxml
             {
                 FileElement fe = all_files.FindById(ci.fileref);
                 int tc = start_tc + ci.start;
-                files.Add(new TrackFile(tc, ci.duration, fe));
+                files.Add(new TrackFile(tc, ci.duration, ci.inf, fe));
             }
         }
     }
@@ -243,7 +284,10 @@ namespace Switchedxml
         }
 
         public void Read(string path)
-        { 
+        {
+            all_files.Clear();
+            tracks.Clear();
+
             xd = XDocument.Parse(System.IO.File.ReadAllText(path));
 
             project_tc = new TimeCode(xd.XPathSelectElement("/xmeml/sequence/timecode"));
@@ -272,9 +316,9 @@ namespace Switchedxml
             int trkno=0;
             foreach (Track t in tracks)
             {
-                video.Add(t.CreateTrackNode(log, trkno ++) );
+                video.Add(t.CreateTrackNode(project_tc.Frame, log, trkno ++) );
             }
-            video.Add(Track.CreateVirtualTrackNode(log, tracks));
+            video.Add(Track.CreateVirtualTrackNode(project_tc.Frame, log, tracks));
             video.Add(Format());
 
             xd.Save("test.xml");
@@ -289,7 +333,7 @@ namespace Switchedxml
                             new XElement("pixelaspectratio", "square"),
                             new XElement("fielddominance", "upper"),
                             new XElement("rate",
-                                new XElement("timebase", 30),
+                                new XElement("timebase", 60),
                                 new XElement("ntsc", "true")
                             ),
                             new XElement("colordepth", 24),
