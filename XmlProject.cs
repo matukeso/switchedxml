@@ -191,8 +191,11 @@ namespace Switchedxml
                     break;
                 }
 
+                int fend = fe.f_start_tc + fe.f_length;
+
                 int inf = start_tc - fe.f_start_tc;
-                int cliplen = Math.Min(fe.f_length - inf , frame_len);
+                int rellen = fend - start_tc;
+                int cliplen = Math.Min(rellen, frame_len);
 
                 // log start tc < splitted file . so move next file.
                 if (cliplen <= 0)
@@ -262,7 +265,7 @@ namespace Switchedxml
             foreach(ClipItem ci in this)
             {
                 FileElement fe = all_files.FindById(ci.fileref);
-                int tc = start_tc + ci.start;
+                int tc = projecttc + ci.start - ci.inf;
                 files.Add(new TrackFile(tc, ci.duration, ci.inf, fe));
             }
         }
