@@ -70,9 +70,17 @@ namespace Switchedxml
                 var tracklog = from t in track.files
                                select string.Format("{1}, {2}, {0}",
                                     t.fe.name, TCUtility.DfFrameToDate(t.f_start_tc), t.f_length);
-                lists[ii].Items.Clear();
-                lists[ii].Items.AddRange(tracklog.ToArray<string>());
-                ii++;
+
+                string[] logs = tracklog.ToArray<string>();
+                if (ii < lists.Length)
+                {
+                    lists[ii].Items.Clear();
+                    lists[ii].Items.AddRange(logs);
+                }
+                if (logs.Length > 0)
+                {
+                    ii++;
+                }
                 //                t.files
             }
         }
