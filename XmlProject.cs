@@ -98,11 +98,18 @@ namespace Switchedxml
     public class Track : List<ClipItem>
     {
         string fileref_first;
+        string filename;
+
+        public Track(string f) { filename = f; }
         public Track(XElement elem)
         {
             foreach (XElement xe in elem.Elements("clipitem"))
             {
-                this.Add(new ClipItem(xe));
+                if (xe.Element("duration") != null)
+                {
+                    this.Add(new ClipItem(xe, start));
+                    start = this[Count - 1].end;
+                }
             }
             if (this.Count > 0)
             {
