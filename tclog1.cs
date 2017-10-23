@@ -40,7 +40,8 @@ namespace Switchedxml
                     string s = tr.ReadLine();
                     if (s == null)
                         break;
-                    string []sv = s.Split('=',',');
+                    string s_without_s = s.Replace("S", "");
+                    string []sv = s_without_s.Split('=',',');
                     if (sv.Length != 9)
                         continue;
                     string svtext = sv[1].Replace(" QPL:", "");
