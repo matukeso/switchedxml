@@ -300,11 +300,15 @@ namespace Switchedxml
             {
                 all_files.Add(new FileElement(xe));
             }
+
             foreach (XElement xe in xd.XPathSelectElements("//video/track"))
             {
                 Track t = new Track(xe);
-                t.MakeRelation(project_tc.Frame, all_files);
-                tracks.Add(t);
+                if (t.Count > 0)
+                {
+                    t.MakeRelation(project_tc.Frame, all_files);
+                    tracks.Add(t);
+                }
             }
         }
 
