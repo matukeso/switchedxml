@@ -67,6 +67,8 @@ namespace Switchedxml
         TimeCode filetc;
 
         public int tc {  get { return TCUtility.dateDfToFrame60(timecode); } }
+
+        public FileElement() { }
         public FileElement(XElement elem)
         {
             id = elem.Attribute("id").Value;
