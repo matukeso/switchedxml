@@ -35,16 +35,17 @@
             this.listBox4 = new System.Windows.Forms.ListBox();
             this.listBox5 = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.lblProjectTC = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
+            this.button1.Location = new System.Drawing.Point(542, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(109, 23);
             this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
+            this.button1.Text = "作成";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -127,11 +128,22 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(642, 395);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
+            // lblProjectTC
+            // 
+            this.lblProjectTC.AutoSize = true;
+            this.lblProjectTC.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblProjectTC.Location = new System.Drawing.Point(11, 16);
+            this.lblProjectTC.Name = "lblProjectTC";
+            this.lblProjectTC.Size = new System.Drawing.Size(82, 19);
+            this.lblProjectTC.TabIndex = 3;
+            this.lblProjectTC.Text = "TimeCode=";
+            // 
             // SXMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(666, 453);
+            this.Controls.Add(this.lblProjectTC);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.button1);
             this.Name = "SXMainForm";
@@ -139,6 +151,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -151,6 +164,7 @@
         private System.Windows.Forms.ListBox listBox4;
         private System.Windows.Forms.ListBox listBox5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Label lblProjectTC;
     }
 }
 

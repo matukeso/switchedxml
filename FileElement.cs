@@ -21,6 +21,29 @@ namespace Switchedxml
             return TCUtility.DfFrameToDate(tcframe);
         }
         public int Frame {  get { return tcframe; } }
+
+        public TimeCode( int tc, int framerate)
+        {
+            tcframe = tc * 60 / framerate;
+            tcstr = TCUtility.DfFrameToDate(tcframe);
+            original_rate = framerate;
+        }
+        public XElement ToElement()
+        {
+            XElement xe =
+                new XElement("timecode",
+                    new XElement("string", TCUtility.DfFrameToDate(tcframe)),
+                    new XElement("frame", tcframe),
+                    new XElement("displayformat", "DF"),
+                    new XElement("rate",
+                        new XElement("timebase", 60),
+                        new XElement("ntsc", "true")
+                    )
+                   );
+
+            return xe;
+        }
+
         public TimeCode(XElement xe)
         {
             tcstr = xe.Element("string").Value.ToString();

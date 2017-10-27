@@ -12,7 +12,9 @@ namespace Switchedxml
 {
     public class EdiusProject
     {
-        Dictionary<string, FileElement> files = new Dictionary<string, FileElement>();
+        public Dictionary<string, FileElement> files = new Dictionary<string, FileElement>();
+        public List<Track> tracks = new List<Track>();
+
         public void ReadProject(string zipfilename)
         {
             using (ZipArchive zip = ZipFile.OpenRead(zipfilename))
@@ -21,7 +23,7 @@ namespace Switchedxml
                 {
                     if (a.Name.ToLower().EndsWith(".ews"))
                     {
-                        XDocument xd = OnReadProjectFile(a);
+                        XDocument xd = ConvertEdiusToXML(a);
                         Project(xd);
                     }
                 }
@@ -29,14 +31,14 @@ namespace Switchedxml
                 {
                     if (a.Name.ToUpper().Contains(ActiveTimelineGUID))
                     {
-                        XDocument xd = OnReadProjectFile(a);
+                        XDocument xd = ConvertEdiusToXML(a);
                         TimeLine(a.Name, xd);
                     }
                 }
             }
         }
 
-        XDocument OnReadProjectFile(ZipArchiveEntry a)
+        XDocument ConvertEdiusToXML(ZipArchiveEntry a)
         {
             EdiusReadAsXML xmlr = new EdiusReadAsXML();
             StringBuilder sb = new StringBuilder();
@@ -75,7 +77,7 @@ namespace Switchedxml
                     FileElement fe = new FileElement();
                     fe.id = strid;
                     fe.pathurl = filename;
-                    fe.name = filename;
+                    fe.name = System.IO.Path.GetFileNameWithoutExtension(filename);
                     fe.duration = int.Parse(durV);
                     files[strid] = fe;
 
@@ -83,9 +85,14 @@ namespace Switchedxml
             }
         }
 
-        List<Track> tracks = new List<Track>();
+        string title;
+        public string Title {  get { return title; } }
+        string project_tc;
+        public int ProjectTC {  get { return int.Parse(project_tc); } }
         void TimeLine(string filename, XDocument xd)
         {
+            project_tc = xd.XPathSelectElement("//TimelineSequenceSettings/BODY/StartFrameNumber").Value;
+            title = xd.XPathSelectElement("//ProjectInformations/ProjectSettings/BODY/Name").Value;
             foreach (var tracklist in xd.XPathSelectElements("//TrackList"))
             {
                 string ty = tracklist.Element("Type").Value;

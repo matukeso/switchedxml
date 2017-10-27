@@ -18,25 +18,32 @@ namespace Switchedxml
             this.AllowDrop = true;
         }
 
-        TCLog1 log = new TCLog1();
-        XmlProject xp = new XmlProject();
+        TCLog1 m_tclog = new TCLog1();
+        XmlProject m_xp = new XmlProject();
 
         protected override void OnDragDrop(DragEventArgs drgevent)
         {
             string []files = drgevent.Data.GetData(DataFormats.FileDrop) as string[];
             foreach( String f in files)
             {
-                if (f.ToUpper().EndsWith(".XML"))
+                string fu = f.ToUpper();
+                if (fu.EndsWith(".XML"))
                 {
                     LoadProject(f);
                 }
-                if (f.ToUpper().EndsWith(".TXT"))
+                if(fu.EndsWith(".EZP"))
+                {
+                    LoadEdiusProject(f);
+
+                }
+                if (fu.EndsWith(".TXT"))
                 {
                     LoadLog(f);
                 }
             }
 
         }
+
         protected override void OnDragEnter(DragEventArgs drgevent)
         {
             drgevent.Effect = DragDropEffects.Link;
@@ -45,10 +52,10 @@ namespace Switchedxml
         void LoadLog(string f)
         {
             //@"C:\Users\matuken\Documents\recved\広島フラ1日目.txt"
-            log.Read(f);
+            m_tclog.Read(f);
 
 
-            var logtexts = from p in log
+            var logtexts = from p in m_tclog
                            select string.Format("{0}={1} - {2}",
                                 p.ch, TCUtility.DfFrameToDate(p.start_tc), p.length);
             listBox1.Items.Clear();
@@ -59,13 +66,32 @@ namespace Switchedxml
 
         void LoadProject(string f)
         {
-            xp.Read(f);
+            m_xp.Read(f);
 
+            RefreshXPListbox();
+        }
+
+        private void LoadEdiusProject(string f)
+        {
+            EdiusProject ep = new Switchedxml.EdiusProject();
+            ep.ReadProject(f);
+
+            m_xp.Read(ep);
+            RefreshXPListbox();
+
+            this.lblProjectTC.Text = String.Format("{0} = {1}f",
+                TCUtility.DfFrameToDate(ep.ProjectTC), ep.ProjectTC.ToString());
+            this.Text = "switchedxml - " + m_xp.title;
+
+        }
+
+        private void RefreshXPListbox()
+        {
             ListBox[] lists = new ListBox[] { listBox2, listBox3, listBox4, listBox5 };
 
 
             int ii = 0;
-            foreach (Track track in xp.tracks)
+            foreach (Track track in m_xp.tracks)
             {
                 var tracklog = from t in track.files
                                select string.Format("{1}, {2}, {0}",
@@ -85,15 +111,16 @@ namespace Switchedxml
             }
         }
 
+
         private void button1_Click(object sender, EventArgs e)
         {
-            foreach( FileElement f  in xp.all_files)
+            foreach( FileElement f  in m_xp.all_files)
             {
                 f.m_bfirst = true;
             }
             Track.uniqueid = 0;
 
-            xp.RebuildByLength(log);   
+            m_xp.RebuildByLength(m_tclog);   
         }
 
         private void Form1_Load(object sender, EventArgs e)

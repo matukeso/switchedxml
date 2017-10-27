@@ -14,9 +14,8 @@ namespace Switchedxml
         [STAThread]
         static void Main()
         {
-            EdiusProject ep = new Switchedxml.EdiusProject();
-            ep.ReadProject(@"C:\Users\matuken\Documents\recved\ezp-Sample.ezp");
             ///TCUtility.Test();
+            new EdiusProject().ReadProject(@"C:\Users\matuken\Documents\recved\ezp-Sample.ezp");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new SXMainForm());

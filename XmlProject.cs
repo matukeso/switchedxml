@@ -99,6 +99,14 @@ namespace Switchedxml
     {
         string fileref_first;
         string filename;
+        public List<TrackFile> files = new List<TrackFile>();
+        int start_tc;
+
+        public void clear()
+        {
+            this.Clear();
+            files.Clear();
+        }
 
         public Track(string f) { filename = f; }
         public Track(XElement elem)
@@ -107,8 +115,7 @@ namespace Switchedxml
             {
                 if (xe.Element("duration") != null)
                 {
-                    this.Add(new ClipItem(xe, start));
-                    start = this[Count - 1].end;
+                    this.Add(new ClipItem(xe));
                 }
             }
             if (this.Count > 0)
@@ -259,8 +266,6 @@ namespace Switchedxml
             }
         }
 
-        public List<TrackFile> files = new List<TrackFile>();
-        int start_tc;
         internal void MakeRelation(int projecttc, FileElements all_files)
         {
             if (this.Count > 0)
@@ -293,10 +298,28 @@ namespace Switchedxml
         {
         }
 
+        const string InternalDummyXMLFile = "projectemplate.xml";
+        public void Read(EdiusProject ep)
+        {
+            clear();
+            xd = XDocument.Parse(System.IO.File.ReadAllText(InternalDummyXMLFile));
+            title = ep.Title;
+            project_tc = new TimeCode(ep.ProjectTC, 60);
+            foreach( var xe in ep.files)
+            {
+                all_files.Add(xe.Value);
+            }
+            tracks = ep.tracks;
+            foreach (var t in tracks)
+            {
+                t.MakeRelation(project_tc.Frame, all_files);
+            }
+
+        }
+
         public void Read(string path)
         {
-            all_files.Clear();
-            tracks.Clear();
+            clear();
 
             xd = XDocument.Parse(System.IO.File.ReadAllText(path));
 
@@ -319,11 +342,14 @@ namespace Switchedxml
             }
         }
 
+        public void clear()
+        {
+            all_files.Clear();
+            tracks.Clear();
+        }
 
         public void RebuildByLength(TCLog1 log)
         {
-            //int totla_length = lengths.Sum(s => s.Value);
-            //xd.XPathSelectElement("//sequence/duration").SetValue(totla_length);
 
             XElement video = xd.XPathSelectElement("//video");
             video.RemoveNodes();
@@ -334,8 +360,25 @@ namespace Switchedxml
             }
             video.Add(Track.CreateVirtualTrackNode(project_tc.Frame, log, tracks));
             video.Add(Format());
+            {
+                xd.XPathSelectElement("//sequence/name").SetValue(title);
+            }
+            {
+                int totla_length = log.Sum(s => s.length);
+                xd.XPathSelectElement("//sequence/duration").SetValue(totla_length);
+            }
 
-            xd.Save("test.xml");
+            {
+                XElement newxe = project_tc.ToElement();
+                XElement ov = xd.XPathSelectElement("//sequence/timecode");
+                ov.RemoveNodes();
+                foreach (XElement nodes in newxe.Elements())
+                {
+                    ov.Add(nodes);
+                }
+            }
+
+            xd.Save(title + ".xml");
         }
         XElement Format()
         {
