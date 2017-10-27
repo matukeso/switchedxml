@@ -297,12 +297,10 @@ namespace Switchedxml
         public XmlProject()
         {
         }
-
-        const string InternalDummyXMLFile = "projectemplate.xml";
         public void Read(EdiusProject ep)
         {
             clear();
-            xd = XDocument.Parse(System.IO.File.ReadAllText(InternalDummyXMLFile));
+            xd = XDocument.Parse(Properties.Resources.ProjectTemplateXML);
             title = ep.Title;
             project_tc = new TimeCode(ep.ProjectTC, 60);
             foreach( var xe in ep.files)
