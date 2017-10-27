@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xmeml>
+<xmeml version="5">
+    <sequence>
+        <name>switchedxml</name>
+        <duration>865</duration>
+        <rate>
+            <timebase>60</timebase> 
+            <ntsc>true</ntsc>
+        </rate>
+        <timecode>
+            <string>00:00:00:00</string>
+            <frame>0</frame>
+            <displayformat>DF</displayformat>
+            <rate>
+                <timebase>60</timebase>
+                <ntsc>true</ntsc>
+            </rate>
+        </timecode>
+        <media>
+          <video></video>
+        </media>
+    </sequence>
+</xmeml>
