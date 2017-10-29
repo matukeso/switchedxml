@@ -114,10 +114,10 @@ namespace Switchedxml
                             ClipItem ci = new ClipItem();
                             ci.id = id;
                             ci.name = name;
-                            ci.duration = int.Parse(dur);
-                            ci.inf = int.Parse(fStart) >> 16;
-                            ci.outf = int.Parse(fEnd) >> 16;
+                            ci.inf = (int)(long.Parse(fStart) >> 14);
+                            ci.outf = (int)(long.Parse(fEnd) >> 14);
                             ci.start = int.Parse(inf);
+                            ci.duration = int.Parse(dur) + ci.inf;
                             ci.end  = ci.start + ci.duration;
                             ci.fileref = id;
                             ttrack.Add(ci);
