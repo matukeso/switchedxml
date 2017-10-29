@@ -366,7 +366,7 @@ namespace Switchedxml
                 xd.XPathSelectElement("//sequence/duration").SetValue(totla_length);
             }
 
-            {
+            if(project_tc != null ){
                 XElement newxe = project_tc.ToElement();
                 XElement ov = xd.XPathSelectElement("//sequence/timecode");
                 ov.RemoveNodes();
