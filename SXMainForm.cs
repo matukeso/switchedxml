@@ -40,6 +40,10 @@ namespace Switchedxml
                 {
                     LoadLog(f);
                 }
+                if (fu.EndsWith(".LOG"))
+                {
+                    LoadLog(f);
+                }
             }
 
         }
