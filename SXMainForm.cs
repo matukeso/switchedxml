@@ -114,6 +114,7 @@ namespace Switchedxml
                 //                t.files
             }
         }
+        System.Media.SoundPlayer wav = new System.Media.SoundPlayer(@"c:\Windows\Media\Speech On.wav");
 
 
         private void button1_Click(object sender, EventArgs e)
@@ -127,6 +128,8 @@ namespace Switchedxml
             Track.uniqueid = 0;
 
             m_xp.RebuildByLength(m_tclog);   
+            wav.Play();
+        }
         private void SaveWindowPosition()
         {
             using (Microsoft.Win32.RegistryKey regkey =
