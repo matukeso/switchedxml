@@ -118,13 +118,25 @@ namespace Switchedxml
 
         private void button1_Click(object sender, EventArgs e)
         {
-            foreach( FileElement f  in m_xp.all_files)
+            SaveWindowPosition();
+
+            foreach ( FileElement f  in m_xp.all_files)
             {
                 f.m_bfirst = true;
             }
             Track.uniqueid = 0;
 
             m_xp.RebuildByLength(m_tclog);   
+        private void SaveWindowPosition()
+        {
+            using (Microsoft.Win32.RegistryKey regkey =
+                Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\ACC\SwitchedXML"))
+            {
+                Rectangle rect = (WindowState == FormWindowState.Normal) ? DesktopBounds : RestoreBounds;
+                regkey.SetValue("WindowPosition", String.Format("{0},{1},{2},{3},{4}",
+                    (int)this.WindowState,
+                    rect.Left, rect.Top, rect.Width, rect.Height));
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
