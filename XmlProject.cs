@@ -285,25 +285,22 @@ namespace Switchedxml
 
     public class XmlProject
     {
-        XDocument xd;
 
         public string title { set; get; }
         public FileElements all_files = new FileElements();
         public List<Track> tracks = new List<Track>();
         public int duration;
 
-        TimeCode project_tc; 
+        public TimeCode project_tc;
 
         public XmlProject()
         {
         }
         public void Read(EdiusProject ep)
         {
-            clear();
-            xd = XDocument.Parse(Properties.Resources.ProjectTemplateXML);
             title = ep.Title;
             project_tc = new TimeCode(ep.ProjectTC, 60);
-            foreach( var xe in ep.files)
+            foreach (var xe in ep.files)
             {
                 all_files.Add(xe.Value);
             }
@@ -318,18 +315,19 @@ namespace Switchedxml
         public void Read(string path)
         {
             clear();
+            XDocument m_xd = XDocument.Parse(Properties.Resources.ProjectTemplateXML);
 
-            xd = XDocument.Parse(System.IO.File.ReadAllText(path));
+            m_xd = XDocument.Parse(System.IO.File.ReadAllText(path));
 
-            project_tc = new TimeCode(xd.XPathSelectElement("/xmeml/sequence/timecode"));
+            project_tc = new TimeCode(m_xd.XPathSelectElement("/xmeml/sequence/timecode"));
 
             //            XElement first_track = xd.XPathSelectElement(/)
-            foreach (XElement xe in xd.XPathSelectElements("//file[pathurl]"))
+            foreach (XElement xe in m_xd.XPathSelectElements("//file[pathurl]"))
             {
                 all_files.Add(new FileElement(xe));
             }
 
-            foreach (XElement xe in xd.XPathSelectElements("//video/track"))
+            foreach (XElement xe in m_xd.XPathSelectElements("//video/track"))
             {
                 Track t = new Track(xe);
                 if (t.Count > 0)
@@ -346,15 +344,15 @@ namespace Switchedxml
             tracks.Clear();
         }
 
-        public void RebuildByLength(TCLog1 log)
+        public XDocument RebuildByLength(TCLog1 log)
         {
-
+            XDocument xd = XDocument.Parse(Properties.Resources.ProjectTemplateXML);
             XElement video = xd.XPathSelectElement("//video");
             video.RemoveNodes();
-            int trkno=0;
+            int trkno = 0;
             foreach (Track t in tracks)
             {
-                video.Add(t.CreateTrackNode(project_tc.Frame, log, trkno ++) );
+                video.Add(t.CreateTrackNode(project_tc.Frame, log, trkno++));
             }
             video.Add(Track.CreateVirtualTrackNode(project_tc.Frame, log, tracks));
             video.Add(Format());
@@ -366,7 +364,8 @@ namespace Switchedxml
                 xd.XPathSelectElement("//sequence/duration").SetValue(totla_length);
             }
 
-            if(project_tc != null ){
+            if (project_tc != null)
+            {
                 XElement newxe = project_tc.ToElement();
                 XElement ov = xd.XPathSelectElement("//sequence/timecode");
                 ov.RemoveNodes();
@@ -375,8 +374,8 @@ namespace Switchedxml
                     ov.Add(nodes);
                 }
             }
-
-            xd.Save(title + ".xml");
+            return xd;
+//            xd.Save(title + ".xml");
         }
         XElement Format()
         {

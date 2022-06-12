@@ -20,6 +20,7 @@ namespace Switchedxml
 
         TCLog1 m_tclog = new TCLog1();
         XmlProject m_xp = new XmlProject();
+        string original_project_filename;
 
         protected override void OnDragDrop(DragEventArgs drgevent)
         {
@@ -30,11 +31,12 @@ namespace Switchedxml
                 if (fu.EndsWith(".XML"))
                 {
                     LoadProject(f);
+                    original_project_filename = f;
                 }
                 if(fu.EndsWith(".EZP"))
                 {
                     LoadEdiusProject(f);
-
+                    original_project_filename = f;
                 }
                 if (fu.EndsWith(".TXT"))
                 {
@@ -75,10 +77,19 @@ namespace Switchedxml
             RefreshXPListbox();
         }
 
+        PureEdiusProject edius_prj;
         private void LoadEdiusProject(string f)
         {
             EdiusProject ep = new Switchedxml.EdiusProject();
             ep.ReadProject(f);
+            edius_prj = ep.prj;
+
+            comboBox1.Items.Clear();
+            foreach (var v in edius_prj.timelines)
+            {
+                comboBox1.Items.Add(v);
+                button2.Enabled = true;
+            }
 
             m_xp.Read(ep);
             RefreshXPListbox();
@@ -88,7 +99,20 @@ namespace Switchedxml
             this.Text = "switchedxml - " + m_xp.title;
 
         }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            EdiusTimeline t = (EdiusTimeline)(comboBox1.SelectedItem);
 
+            EdiusProject ep = new Switchedxml.EdiusProject();
+            ep.ReadProject(original_project_filename, t.guid);
+
+            m_xp.Read(ep);
+            RefreshXPListbox();
+
+            this.lblProjectTC.Text = String.Format("{0} = {1}f",
+                TCUtility.DfFrameToDate(ep.ProjectTC), ep.ProjectTC.ToString());
+            this.Text = "switchedxml - " + m_xp.title;
+        }
         private void RefreshXPListbox()
         {
             ListBox[] lists = new ListBox[] { listBox2, listBox3, listBox4, listBox5 };
@@ -127,7 +151,28 @@ namespace Switchedxml
             }
             Track.uniqueid = 0;
 
-            m_xp.RebuildByLength(m_tclog);   
+            int dif_tc_60 = (int)numericUpDown1.Value;
+
+            TCLog1 newlog = new TCLog1();
+            for( int i=0; i<m_tclog.Count; i++)
+            {
+                TCLogElement le = m_tclog[i];
+                le.start_tc += dif_tc_60;
+                newlog.Add(le);
+            }
+
+            System.Xml.Linq.XDocument doc =m_xp.RebuildByLength(newlog);
+            string filedir = System.IO.Path.GetDirectoryName(original_project_filename);
+            string filebase = System.IO.Path.GetFileNameWithoutExtension(original_project_filename);
+            try
+            {
+                EdiusTimeline t = (EdiusTimeline)(comboBox1.SelectedItem);
+                filebase += "_" + t.name;
+            }
+            catch (Exception ex) { }
+            string tcxml = System.IO.Path.Combine(filedir, filebase + "_tc.xml");
+            doc.Save(tcxml);
+
             wav.Play();
         }
         private void SaveWindowPosition()
@@ -142,9 +187,26 @@ namespace Switchedxml
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+            private void Form1_Load(object sender, EventArgs e)
         {
 
         }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                int frame = TCUtility.dateDfToFrame30((sender as Control).Text);
+                label1.Text = $"{frame.ToString()} ";
+
+                int tc = m_xp.project_tc.Frame;
+                label1.Text = $"{frame.ToString()} {frame-tc}";
+
+            }
+            catch (Exception ex)
+            { }
+        }
+
+
     }
 }
