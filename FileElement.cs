@@ -77,15 +77,23 @@ namespace Switchedxml
 
     public class FileElement
     {
-
+        public override string ToString()
+        {
+            return $"{id} = {name}";
+        }
         public string id { set; get; }
         public string pathurl { set; get; }
 
         public string name { get; set; }
 
         public int duration { get; set; }
+        
+        public string fps { get; set; } = "60000";
+        public bool is60fps {  get { return fps == "60000"; } }
+
 
         public string timecode { get; set; }
+        public string tc_prj { get; set; }
 
         TimeCode filetc;
 
@@ -115,13 +123,13 @@ namespace Switchedxml
                 char ch = src[si];
                 if (percent == 1)
                 {
-                    barr[di] = (byte)(byte.Parse(ch.ToString(), System.Globalization.NumberStyles.HexNumber) << (4));
+                    barr[di] = (byte)(Hex2Int(ch) << 4);
                     percent--;
                     continue;
                 }
                 if (percent == 0)
                 {
-                    barr[di] |= (byte)(byte.Parse(ch.ToString(), System.Globalization.NumberStyles.HexNumber));
+                    barr[di] |= Hex2Int(ch) ;
                     percent--;
                     di++;
                     continue;
@@ -134,6 +142,21 @@ namespace Switchedxml
                 barr[di++] = (byte)ch;
             }
             return Encoding.UTF8.GetString(barr, 0, di - 1);
+        }
+        static byte Hex2Int(char ch)
+        {
+            if ('0' <= ch && ch <= '9')
+                return (byte)(ch - '0');
+            switch (ch)
+            {
+                case 'A': case 'a': return 10;
+                case 'B': case 'b': return 11;
+                case 'C': case 'c': return 12;
+                case 'D': case 'd': return 13;
+                case 'E': case 'e': return 14;
+                case 'F': case 'f': return 15;
+            }
+            return 0;
         }
 
         public Boolean m_bfirst = false;
