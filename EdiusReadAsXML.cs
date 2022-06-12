@@ -6,7 +6,25 @@ using System.Threading.Tasks;
 
 using System.IO;
 namespace Switchedxml
+
 {
+    static class XMLSB
+    {
+public        static void AppendXML(this StringBuilder xml, string element, string value)
+        {
+            if (!string.IsNullOrEmpty(element))
+            {
+                xml.AppendFormat("<{0}>{1}</{0}>", element, value);
+            }
+            else
+            {
+                xml.Append(value);
+            }
+            xml.AppendLine("");
+        }
+    }
+
+
     public class EdiusReadAsXML
     {
         static int read_length(Stream sr)
@@ -76,7 +94,6 @@ namespace Switchedxml
 
         }
 
-
         public int ReadItem(StringBuilder xml, Stream ms)
         {
             while (ms.CanRead)
@@ -86,6 +103,7 @@ namespace Switchedxml
                 {
                     case -1:
                         return 0;
+
                     case 0x80:
                     case 0xc0:
                         {
@@ -108,32 +126,28 @@ namespace Switchedxml
                             long pos = ms.Position;
                             string s = read_string_utf8(ms);
                             string v = read_string_utf8(ms);
-                            xml.AppendFormat("<{0}>{1}</{0}>", s,v);
-                            xml.AppendLine("");
+                            xml.AppendXML(s, v);
                         }
                         break;
                     case 0x5c:
                         {
                             string s = read_string_utf8(ms);
                             string v = read_string_utf16(ms);
-                            xml.AppendFormat("<{0}>{1}</{0}>", s, v);
-                            xml.AppendLine("");
+                            xml.AppendXML(s, v);
                         }
                         break;
                     case 0x68:
                         {
                             string s = read_string_utf8(ms);
                             double v = read_float(ms);
-                            xml.AppendFormat("<{0}>{1}</{0}>", s, v);
-                            xml.AppendLine("");
+                            xml.AppendXML(s, v.ToString());
                         }
                         break;
                     case 0x78:
                         {
                             string s = read_string_utf8(ms);
                             long v = read_int(ms);
-                            xml.AppendFormat("<{0}>{1}</{0}>", s, v);
-                            xml.AppendLine("");
+                            xml.AppendXML(s, v.ToString());
                         }
                         break;
                     case 0x70:
