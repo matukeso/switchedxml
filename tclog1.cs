@@ -13,7 +13,7 @@ namespace Switchedxml
         public int length;
         public int ch;
 
-        public TCLogElement(int start, int len , int ch)
+        public TCLogElement(int start, int len, int ch)
         {
             this.start_tc = start;
             this.length = len;
@@ -21,7 +21,7 @@ namespace Switchedxml
         }
         public override string ToString()
         {
-            return string.Format("{0}+{1}={2}", TCUtility.DfFrameToDate(start_tc),  length, ch);
+            return string.Format("{0}+{1}={2}", TCUtility.DfFrameToDate(start_tc), length, ch);
         }
     }
 
@@ -31,7 +31,7 @@ namespace Switchedxml
         public TCLog1() { }
 
 
-        static Tuple<int , int> ParseLine(string s)
+        static Tuple<int, int> ParseLine(string s)
         {
             string s_without_s = s.Replace("S", "");
             string[] sv = s_without_s.Split('=', ',');
@@ -39,7 +39,7 @@ namespace Switchedxml
             {
                 sv = s_without_s.Split(' ', ',');
                 if (sv.Length != 3)
-                    return new Tuple<int, int>(0,0);
+                    return new Tuple<int, int>(0, 0);
             }
             string svtext = sv[1].Replace(" QPL:", "").Replace("QPL:", "");
             int pgm = -1;
@@ -48,7 +48,7 @@ namespace Switchedxml
         }
 
 
-        public void Read( string path)
+        public void Read(string path)
         {
             this.Clear();
             using (StreamReader tr = new StreamReader(path, Encoding.ASCII))
@@ -61,13 +61,9 @@ namespace Switchedxml
                     if (s == null)
                         break;
 
-                    int frame;
-                    int pgm;
-                    var p = ParseLine(s);
-                    frame = p.Item1;
-                    pgm = p.Item2;
+                    (int frame, int pgm) = ParseLine(s);
 
-                    if( pgm >= 0 && pgm != last_switch)
+                    if (pgm >= 0 && pgm != last_switch)
                     {
                         if (prev_f != -1)
                         {
@@ -82,10 +78,7 @@ namespace Switchedxml
                     this.Add(new TCLogElement(prev_f, -1, last_switch));
                 }
             }
-
-
         }
-
-
     }
 }
+
