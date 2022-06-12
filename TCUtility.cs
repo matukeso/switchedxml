@@ -39,7 +39,7 @@ namespace Switchedxml
         /// </summary>
         /// <param name="dat">00:11:22;ff</param>
         /// <returns></returns>
-        public static int dateDfToFrame60(string dat)
+        public static int dateDfToFrame(string dat,bool f60)
         {
             string[] s = dat.Split(';', ':', '.');
             if (s.Length == 4)
@@ -51,29 +51,14 @@ namespace Switchedxml
                 f -= 4 * (hhmmssff[POS_MIN] - hhmmssff[POS_MIN] / 10); ; //drop effect. maybe.
 
                 f += hhmmssff[POS_SEC] * 60;
-                f += hhmmssff[POS_FRAME];
+                f += hhmmssff[POS_FRAME] * (f60 ? 1 : 2);
                 return f;
             }
             return 0;
         }
-        public static int dateDfToFrame30(string dat)
-        {
-            string[] s = dat.Split(';', ':', '.');
-            if (s.Length == 4)
-            {
-                int[] hhmmssff = Array.ConvertAll(s, int.Parse);
-                int f = 0;
-                f += hhmmssff[POS_HOUR] * 107892 * 2;
-                f += hhmmssff[POS_MIN] * 60 * 30 * 2;
-                f -= 4 * (hhmmssff[POS_MIN] - hhmmssff[POS_MIN] / 10); ; //drop effect. maybe.
+        public static int dateDfToFrame60(string dat) { return dateDfToFrame(dat, true); }
+        public static int dateDfToFrame30(string dat) { return dateDfToFrame(dat, false); }
 
-                f += hhmmssff[POS_SEC] * 60;
-                f += hhmmssff[POS_FRAME] * 2;
-                return f;
-            }
-            return 0;
-
-        }
         const int dfmin10 = 17982 * 2;
         const int dfmin1 = 1798 * 2;
         const int hourf = 3600 * 30 * 2;
