@@ -10,35 +10,31 @@ using System.Xml.XPath;
 
 namespace Switchedxml
 {
-    public class EdiusProject
-    {
-        public Dictionary<string, FileElement> files = new Dictionary<string, FileElement>();
-        public List<Track> tracks = new List<Track>();
-
-        public void ReadProject(string zipfilename)
+    public struct EdiusTimeline {
+        public string id;
+        public string name;
+        public string guid;
+     public EdiusTimeline( string i, string n, string g)
         {
-            using (ZipArchive zip = ZipFile.OpenRead(zipfilename))
-            {
-                foreach (var a in zip.Entries)
-                {
-                    if (a.Name.ToLower().EndsWith(".ews"))
-                    {
-                        XDocument xd = ConvertEdiusToXML(a);
-                        Project(xd);
-                    }
-                }
-                foreach (var a in zip.Entries)
-                {
-                    if (a.Name.ToUpper().Contains(ActiveTimelineGUID))
-                    {
-                        XDocument xd = ConvertEdiusToXML(a);
-                        TimeLine(a.Name, xd);
-                    }
-                }
-            }
+            id = i;
+            name = n;
+            guid = g.ToUpper();
         }
 
-        XDocument ConvertEdiusToXML(ZipArchiveEntry a)
+        public override string ToString()
+        {
+            return $"{id} = {name}";
+        }
+
+    }
+
+    public class PureEdiusProject
+    {
+        internal  string ActiveTimelineGUID;
+        internal Dictionary<string, FileElement> files = new Dictionary<string, FileElement>();
+        public readonly List<EdiusTimeline> timelines = new List<EdiusTimeline>();
+
+        public static XDocument ConvertEdiusToXML(ZipArchiveEntry a)
         {
             EdiusReadAsXML xmlr = new EdiusReadAsXML();
             StringBuilder sb = new StringBuilder();
@@ -52,8 +48,30 @@ namespace Switchedxml
             xmlr.ReadItem(sb, new MemoryStream(rawfile));
             return XDocument.Parse(sb.ToString());
         }
+        public PureEdiusProject(ZipArchive zip)
+        {
+            foreach (var a in zip.Entries)
+            {
+                if (a.Name.ToLower().EndsWith(".ews"))
+                {
+                    XDocument project_as_xml = ConvertEdiusToXML(a);
+                    Project(project_as_xml);
+                    Timelines(project_as_xml);
+                }
+            }
+        }
 
-        string ActiveTimelineGUID;
+        void Timelines(XDocument xd)
+        {
+            foreach( var timline in xd.XPathSelectElements("/EdiusProjectFile/TimelineSequenceInformations/TimelineSequence"))
+            {
+                string Name = timline.Element("TimelineSequenceName").Value.ToString();
+                string Guid = timline.Element("TimelineSequenceGUID").Value.ToString();
+                string id = timline.Element("TimelineSequenceSourceId").Value.ToString();
+                timelines.Add( new EdiusTimeline( id, Name, Guid));
+            }
+        }
+
         void Project(XDocument xd)
         {
             //string barename = System.IO.Path.GetFileNameWithoutExtension(a.Name);
@@ -79,11 +97,50 @@ namespace Switchedxml
                     fe.pathurl = filename;
                     fe.name = System.IO.Path.GetFileNameWithoutExtension(filename);
                     fe.duration = int.Parse(durV);
+                    fe.fps = imp.XPathSelectElement("./VIFO/FrameRate/num")?.Value ?? "";
+                    fe.tc_prj = imp.XPathSelectElement("./VIFO/Timecode")?.Value;
                     files[strid] = fe;
-
                 }
             }
         }
+    }
+
+
+    public class EdiusProject
+    {
+        public PureEdiusProject prj;
+        public XDocument project_as_xml;
+        public Dictionary<string, FileElement> files = new Dictionary<string, FileElement>();
+        public List<Track> tracks = new List<Track>();
+
+        public void ReadProject(string zipfilename, string timelineguid = null)
+        {
+            using (ZipArchive zip = ZipFile.OpenRead(zipfilename))
+            {
+                prj = new PureEdiusProject(zip);
+                files = prj.files;
+                if (timelineguid == null)
+                    timelineguid = prj.ActiveTimelineGUID;
+                ReadTimeline(zip, timelineguid);
+            }
+        }
+
+        public  void ReadTimeline( ZipArchive zip, string Aguid)
+        {
+            tracks.Clear();
+            foreach (var a in zip.Entries)
+            {
+                if (a.Name.ToUpper().Contains(Aguid))
+                {
+                    XDocument project_as_xml = PureEdiusProject.ConvertEdiusToXML(a);
+                    TimeLine(a.Name, project_as_xml);
+                }
+            }
+        }
+
+
+
+
 
         string title;
         public string Title {  get { return title; } }
