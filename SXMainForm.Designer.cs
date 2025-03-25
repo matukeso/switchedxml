@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
+            this.btGenerate = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
             this.listBox3 = new System.Windows.Forms.ListBox();
@@ -40,20 +40,20 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btReadTimeline = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
-            // button1
+            // btGenerate
             // 
-            this.button1.Location = new System.Drawing.Point(542, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(109, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "作成";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btGenerate.Location = new System.Drawing.Point(542, 12);
+            this.btGenerate.Name = "btGenerate";
+            this.btGenerate.Size = new System.Drawing.Size(109, 23);
+            this.btGenerate.TabIndex = 0;
+            this.btGenerate.Text = "作成";
+            this.btGenerate.UseVisualStyleBackColor = true;
+            this.btGenerate.Click += new System.EventHandler(this.btGenerate_Click);
             // 
             // listBox1
             // 
@@ -178,16 +178,16 @@
             this.comboBox1.Size = new System.Drawing.Size(172, 20);
             this.comboBox1.TabIndex = 6;
             // 
-            // button2
+            // btReadTimeline
             // 
-            this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(190, 46);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(109, 23);
-            this.button2.TabIndex = 0;
-            this.button2.Text = "タイムライン読み込み";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.btReadTimeline.Enabled = false;
+            this.btReadTimeline.Location = new System.Drawing.Point(190, 46);
+            this.btReadTimeline.Name = "btReadTimeline";
+            this.btReadTimeline.Size = new System.Drawing.Size(109, 23);
+            this.btReadTimeline.TabIndex = 0;
+            this.btReadTimeline.Text = "タイムライン読み込み";
+            this.btReadTimeline.UseVisualStyleBackColor = true;
+            this.btReadTimeline.Click += new System.EventHandler(this.btReadTimeline_Click);
             // 
             // SXMainForm
             // 
@@ -199,8 +199,8 @@
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.lblProjectTC);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btReadTimeline);
+            this.Controls.Add(this.btGenerate);
             this.Name = "SXMainForm";
             this.Text = "SwitchedXMLProject";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -213,7 +213,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btGenerate;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.ListBox listBox3;
@@ -225,7 +225,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btReadTimeline;
     }
 }
 

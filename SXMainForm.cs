@@ -24,8 +24,8 @@ namespace Switchedxml
 
         protected override void OnDragDrop(DragEventArgs drgevent)
         {
-            string []files = drgevent.Data.GetData(DataFormats.FileDrop) as string[];
-            foreach( String f in files)
+            string[] files = drgevent.Data.GetData(DataFormats.FileDrop) as string[];
+            foreach (String f in files)
             {
                 string fu = f.ToUpper();
                 if (fu.EndsWith(".XML"))
@@ -33,7 +33,7 @@ namespace Switchedxml
                     LoadProject(f);
                     original_project_filename = f;
                 }
-                if(fu.EndsWith(".EZP"))
+                if (fu.EndsWith(".EZP"))
                 {
                     LoadEdiusProject(f);
                     original_project_filename = f;
@@ -88,7 +88,7 @@ namespace Switchedxml
             foreach (var v in edius_prj.timelines)
             {
                 comboBox1.Items.Add(v);
-                button2.Enabled = true;
+                btReadTimeline.Enabled = true;
             }
 
             m_xp.Read(ep);
@@ -99,7 +99,7 @@ namespace Switchedxml
             this.Text = "switchedxml - " + m_xp.title;
 
         }
-        private void button2_Click(object sender, EventArgs e)
+        private void btReadTimeline_Click(object sender, EventArgs e)
         {
             EdiusTimeline t = (EdiusTimeline)(comboBox1.SelectedItem);
 
@@ -141,11 +141,11 @@ namespace Switchedxml
         System.Media.SoundPlayer wav = new System.Media.SoundPlayer(@"c:\Windows\Media\Speech On.wav");
 
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btGenerate_Click(object sender, EventArgs e)
         {
             SaveWindowPosition();
 
-            foreach ( FileElement f  in m_xp.all_files)
+            foreach (FileElement f in m_xp.all_files)
             {
                 f.m_bfirst = true;
             }
@@ -154,14 +154,14 @@ namespace Switchedxml
             int dif_tc_60 = (int)numericUpDown1.Value;
 
             TCLog1 newlog = new TCLog1();
-            for( int i=0; i<m_tclog.Count; i++)
+            for (int i = 0; i < m_tclog.Count; i++)
             {
                 TCLogElement le = m_tclog[i];
                 le.start_tc += dif_tc_60;
                 newlog.Add(le);
             }
 
-            System.Xml.Linq.XDocument doc =m_xp.RebuildByLength(newlog);
+            System.Xml.Linq.XDocument doc = m_xp.RebuildByLength(newlog);
             string filedir = System.IO.Path.GetDirectoryName(original_project_filename);
             string filebase = System.IO.Path.GetFileNameWithoutExtension(original_project_filename);
             try
@@ -187,7 +187,7 @@ namespace Switchedxml
             }
         }
 
-            private void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
 
         }
@@ -200,13 +200,11 @@ namespace Switchedxml
                 label1.Text = $"{frame.ToString()} ";
 
                 int tc = m_xp.project_tc.Frame;
-                label1.Text = $"{frame.ToString()} {frame-tc}";
+                label1.Text = $"{frame.ToString()} {frame - tc}";
 
             }
             catch (Exception ex)
             { }
         }
-
-
     }
 }
