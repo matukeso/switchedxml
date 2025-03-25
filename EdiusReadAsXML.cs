@@ -10,15 +10,38 @@ namespace Switchedxml
 {
     static class XMLSB
     {
-public        static void AppendXML(this StringBuilder xml, string element, string value)
+    	
+        static string html_escape(string s)
         {
+            StringBuilder sb = new StringBuilder(s.Length + 256);
+            bool bmodified = false;
+            for (int i = 0; i < s.Length; i++)
+            {
+                switch (s[i]) {
+                    case '&': sb.Append("&amp;"); bmodified = true; break;
+                    case '<': sb.Append("&lt;");   bmodified = true;break;
+                    case '>': sb.Append("&gt;");   bmodified = true;break;
+                    case '"': sb.Append("&quot;"); bmodified = true; break;
+                    default:
+                        sb.Append(s[i]); break;
+                }
+
+            }
+            if (bmodified)
+                return sb.ToString();
+            return s;
+        }
+
+    	public        static void AppendXML(this StringBuilder xml, string element, string value)
+        {
+            string html_value = html_escape(value);
             if (!string.IsNullOrEmpty(element))
             {
-                xml.AppendFormat("<{0}>{1}</{0}>", element, value);
+                xml.AppendFormat("<{0}>{1}</{0}>", element, html_value);
             }
             else
             {
-                xml.Append(value);
+                xml.Append(html_value);
             }
             xml.AppendLine("");
         }
