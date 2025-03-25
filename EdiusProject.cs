@@ -115,7 +115,7 @@ namespace Switchedxml
 
         public void ReadProject(string zipfilename, string timelineguid = null)
         {
-            using (ZipArchive zip = ZipFile.OpenRead(zipfilename))
+            using (ZipArchive zip = ZipFile.Open(zipfilename, ZipArchiveMode.Read, Encoding.UTF8))
             {
                 prj = new PureEdiusProject(zip);
                 files = prj.files;
