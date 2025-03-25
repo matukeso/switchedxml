@@ -36,7 +36,7 @@ namespace Switchedxml
 
         public static XDocument ConvertEdiusToXML(ZipArchiveEntry a)
         {
-            EdiusReadAsXML xmlr = new EdiusReadAsXML();
+            EdiusReadAsXMLSpan xmlr = new EdiusReadAsXMLSpan();
             StringBuilder sb = new StringBuilder();
 
             byte[] rawfile = new byte[a.Length];
@@ -45,7 +45,8 @@ namespace Switchedxml
                 s.Read(rawfile, 0, (int)a.Length);
             }
 
-            xmlr.ReadItem(sb, new MemoryStream(rawfile));
+            var data = new ReadOnlySpan<byte>(rawfile);
+            xmlr.ReadItem(sb,data);
             return XDocument.Parse(sb.ToString());
         }
         public PureEdiusProject(ZipArchive zip)
