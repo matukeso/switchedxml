@@ -99,10 +99,10 @@ namespace Switchedxml
                         {
                             string s = read_string_utf8(ref sr);
                             ReadOnlySpan<byte> data = read_as_byte(ref sr);
-                            if( string.IsNullOrEmpty(s))
-                            {
-                                System.Diagnostics.Debugger.Break();
-                            }
+                            //if( string.IsNullOrEmpty(s))
+                            //{
+                            //    System.Diagnostics.Debugger.Break();
+                            //}
                             StringBuilder sbnew = new StringBuilder();
                             ReadItem(sbnew, data);
                             if (!string.IsNullOrEmpty(s))
@@ -111,10 +111,10 @@ namespace Switchedxml
                             }
                             xml.AppendLine("");
                             xml.Append(sbnew.ToString());
-                            if (sbnew.ToString() == "<>")
-                            {
-                                System.Diagnostics.Debugger.Break();
-                            }
+                            //if (sbnew.ToString() == "<>")
+                            //{
+                            //    System.Diagnostics.Debugger.Break();
+                            //}
                             if (!string.IsNullOrEmpty(s))
                             {
                                 xml.AppendFormat("</{0}>", s);

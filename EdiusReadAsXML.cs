@@ -133,14 +133,26 @@ namespace Switchedxml
                             long pos = ms.Position;
                             string s = read_string_utf8(ms);
                             byte[] data = read_as_byte(ms);
-
+                            //if( string.IsNullOrEmpty(s))
+                            //{
+                            //    System.Diagnostics.Debugger.Break();
+                            //}
                             StringBuilder sbnew = new StringBuilder();
                             ReadItem(sbnew, new MemoryStream(data));
-
-                            xml.AppendFormat("<{0}>", s);
+                            if (!string.IsNullOrEmpty(s))
+                            {
+                                xml.AppendFormat("<{0}>", s);
+                            }
                             xml.AppendLine("");
                             xml.Append(sbnew.ToString());
-                            xml.AppendFormat("</{0}>", s);
+                            //if (sbnew.ToString() == "<>")
+                            //{
+                            //    System.Diagnostics.Debugger.Break();
+                            //}
+                            if (!string.IsNullOrEmpty(s))
+                            {
+                                xml.AppendFormat("</{0}>", s);
+                            }
                             xml.AppendLine("");
                         }
                         break;
